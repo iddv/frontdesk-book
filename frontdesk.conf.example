@@ -1,0 +1,15 @@
+# Copy to frontdesk.conf and edit. Environment variables FRONTDESK_<KEY> override these values.
+[frontdesk]
+host = 127.0.0.1
+port = 8080
+data_dir = ./data
+log_level = INFO
+
+# Email: leave these out to configure email on the in-app Setup > Email page instead.
+# email_mode = smtp
+# smtp_host = smtp.example.com
+# smtp_port = 587
+# smtp_tls = starttls
+# smtp_user = frontdesk@example.com
+# smtp_password = app-password-here
+# smtp_from = frontdesk@example.com
