@@ -190,7 +190,13 @@ def cmd_install_service(cfg):
 def cmd_test():
     import unittest
     here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    suite = unittest.defaultTestLoader.discover(os.path.join(here, "tests"), top_level_dir=here)
+    # Only the unit tests in tests/: tests/acceptance holds the pytest acceptance suite, run with
+    # `python -m pytest tests/acceptance` (discover would import it without pytest's path setup).
+    if here not in sys.path:
+        sys.path.insert(0, here)
+    names = sorted("tests." + f[:-3] for f in os.listdir(os.path.join(here, "tests"))
+                   if f.startswith("test_") and f.endswith(".py"))
+    suite = unittest.defaultTestLoader.loadTestsFromNames(names)
     res = unittest.TextTestRunner(verbosity=2).run(suite)
     sys.exit(0 if res.wasSuccessful() else 1)
 
