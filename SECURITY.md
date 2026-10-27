@@ -48,7 +48,7 @@ The product was started as its README says and probed while running.
 | hostile HTTP | 10,000-level nested JSON body and malformed urlencoded body | pass | 400 (JSON is not parsed at all; the form has no CSRF token) |
 | hostile HTTP | huge numeric ids in URLs (/patients/<25 digits>, /admin/practitioners/<23 digits>) | fail | 500 'Something went wrong' (no traceback in the page; OverflowError in the log) (S4, below) |
 | hostile HTTP | negative and non-numeric ids (/patients/-1, /appt/abc) | pass | 404 |
-| hostile HTTP | slow or idle connections (slowloris) against ThreadingHTTPServer without socket timeouts | not_checked | not tested for budget; the server sets no per-connection timeout and starts one thread per connection |
+| hostile HTTP | slow or idle connections (slowloris) against ThreadingHTTPServer without socket timeouts | pass | the handler sets a 15 second socket timeout; 50 idle connections were closed by the server and /health still answered 200; probe test_idle_connections_do_not_block_service.py |
 | injection | SQL injection: ' OR 1=1 -- in patient search and patient names | pass | parameterised queries; search returned 200 and treated the text literally |
 | injection | stored and reflected XSS: <script> in patient first name and in the search query | pass | rendered HTML-escaped; raw <script> never appears in the page |
 | injection | CSRF: signed-in POST without _csrf, and with a foreign Origin | pass | 400 'The form has expired'; cookies are also SameSite=Strict; probe test_sec_ok_2.py |
@@ -118,7 +118,7 @@ The product was started as its README says and probed while running.
 
 - This was a time-boxed review of v1 by one reviewer with the code and a running copy: scripted probes and manual checks, not a penetration test or an external audit.
 - TLS is not provided; on a LAN the traffic (passwords, patient data) is plain HTTP unless a reverse proxy is added. Not tested.
-- Slow or idle connections (slowloris) and thread exhaustion were not tested.
+- Idle connections are closed after 15 seconds (tested with 50 sockets); a sustained slow-drip attack that sends a byte every few seconds was not tested.
 - The CLI backup/restore commands, backup file permissions and the outbox.log permissions were not checked in detail.
 - Not every form field was fuzzed for XSS and SQL injection; patient name and search were tested, other fields were reviewed only by reading that output is passed through the escape helper.
 - Account lockout is per username, so anyone who can reach the sign-in page can lock a known staff account for 15 minutes; this is the spec's design and was not ranked as a finding.
