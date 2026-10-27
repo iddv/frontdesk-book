@@ -1353,6 +1353,7 @@ def _dispatch(req):
 class Handler(BaseHTTPRequestHandler):
     server_version = "FrontDeskBook"
     sys_version = ""
+    timeout = 15  # seconds; idle or stalled connections are closed quietly
 
     def _go(self):
         raw_len = (self.headers.get("Content-Length") or "0").strip()
@@ -1381,4 +1382,5 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, fmt, *args):
         # request line only (no bodies, so no passwords); query strings may hold search terms, so strip them
-        log.debug("%s %s", self.command, self.path.split("?")[0])
+        # a timed-out connection never sent a request line, so there is no command or path
+        log.debug("%s %s", getattr(self, "command", "-"), getattr(self, "path", "-").split("?")[0])

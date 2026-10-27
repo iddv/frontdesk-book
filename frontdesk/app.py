@@ -93,6 +93,7 @@ def cmd_run(cfg, demo=False):
             conn.close()
     app = App(cfg)
     try:
+        ThreadingHTTPServer.request_queue_size = 128  # the default of 5 leaves bursts of connections stuck unaccepted
         server = ThreadingHTTPServer((cfg.host, cfg.port), web.Handler)
     except OSError as ex:
         if ex.errno in (errno.EADDRINUSE, getattr(errno, "WSAEADDRINUSE", -1)):
